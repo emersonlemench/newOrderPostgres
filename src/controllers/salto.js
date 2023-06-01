@@ -1,19 +1,39 @@
 const cron = require("node-cron");
-const { Client } = require("pg");
+const client = require('./dataConfig')
 
-    const client = new Client({
-      host: "db.cbohscidegiybbfhzyeu.supabase.co",
-      database: "postgres",
-      port: 5432,
-      user: "postgres",
-      password: "SdEiY4ornVUmJOPY",
-    });
-    
-    client.connect(console.log("Conectado a Postgres"));
-    
-    client.query("select orden from ordenes", (error, respuestas) => {
-      ultimoString = respuestas.rows.pop().orden;
-    
-    })
+const inicioDeMes = async () => {
+  try {
+    await client.connect();
+    console.log('Conexión exitosa a la base de datos');
 
-console.log(ultimoString)
+    const result = await client.query('SELECT orden FROM ordenes');
+    let data = 0; // Valor predeterminado para la variable data
+
+    if (result.rows.length > 0) {
+      data = result.rows.pop().orden;
+    }
+
+    let centena = Math.ceil(data / 100) * 100;
+    let dosNum = data.toString().slice(-2);
+
+    if (dosNum === '00') {
+      await client.query(`INSERT INTO ordenes (orden) VALUES (${centena + 100 - 1})`);
+      console.log('igual a 00');
+    } else {
+      await client.query(`INSERT INTO ordenes (orden) VALUES (${centena - 1})`);
+      console.log('ni parecido');
+    }
+
+    console.log('Mes iniciado');
+  } catch (error) {
+    console.error('Tenemos problemas con salto', error);
+  } finally {
+    client.end();
+  }
+};
+
+cron.schedule('0 3 1 * *', () => {
+  inicioDeMes();
+});
+
+module.exports = inicioDeMes;

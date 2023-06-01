@@ -1,56 +1,54 @@
 const controlBoton = {
   index: (req, res) => {
-    res.render('index');
+    res.render("index");
   },
   orden: (req, res) => {
-    res.render('orden');
+    res.render("orden");
   },
-  generate: (req, res) => {
-    const { Client } = require('pg');
+  generate: async (req, res) => {
+    const { Client } = require("pg");
 
     const client = new Client({
-      host: 'db.cbohscidegiybbfhzyeu.supabase.co',
-      database: 'postgres',
+      host: "db.cbohscidegiybbfhzyeu.supabase.co",
+      database: "postgres",
       port: 5432,
-      user: 'postgres',
-      password: 'SdEiY4ornVUmJOPY'
+      user: "postgres",
+      password: "SdEiY4ornVUmJOPY",
     });
 
-    client.connect((err) => {
-      if (err) {
-        console.error('Error al conectar a Postgres', err);
-        return;
-      }
+    try {
+      await client.connect();
 
-      console.log('Conectado a Postgres');
+      console.log("Conectado a Postgres desde GENERATE");
+
+      await client.query("BEGIN");
+
+      const result = await client.query("SELECT MAX(orden) AS max_numero FROM ordenes");
 
       let numeroPlusOne;
       let ultimoInt;
 
-      client.query('SELECT orden FROM ordenes', (error, respuestas) => {
-        if (error) {
-          console.error('Error al ejecutar la consulta', error);
-          client.end();
-          return;
-        }
+      const ultimoString = result.rows.pop().max_numero;
+      ultimoInt = JSON.parse(ultimoString);
+      numeroPlusOne = ultimoInt + 1;
 
-        ultimoString = respuestas.rows.pop().orden;
-        ultimoInt = JSON.parse(ultimoString);
-        numeroPlusOne = ultimoInt + 1;
+      await client.query(`INSERT INTO ordenes (orden) VALUES (${numeroPlusOne})`);
 
-        client.query(`INSERT INTO ordenes (orden) VALUES (${numeroPlusOne})`, (error) => {
-          if (error) {
-            console.error('Error al insertar la orden', error);
-          }
+      await client.query("COMMIT");
 
-          console.log(numeroPlusOne);
-          client.end();
+      console.log(numeroPlusOne);
 
-          res.render('orden', { ultimoInt, numeroPlusOne });
-        });
-      });
-    });
-  }
+      res.render("orden", { ultimoInt, numeroPlusOne });
+    } catch (error) {
+      console.error("Error al generar el número de orden", error);
+
+      await client.query("ROLLBACK");
+
+      // Manejar el error según sea necesario
+    } finally {
+      client.end();
+    }
+  },
 };
 
 module.exports = controlBoton;
