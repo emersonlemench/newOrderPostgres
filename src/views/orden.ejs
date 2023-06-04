@@ -24,13 +24,13 @@
         </button>
 
         <form action="/" method="GET">
-          <button>Inicio</button>
+          <button id="init">Inicio</button>
         </form>
       </div>
     </section>
   
     <style>
-      * {
+     * {
   font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
     "Lucida Sans", Arial, sans-serif;
 }
@@ -142,6 +142,47 @@ button::before {
   font-size: 1em;
  text-align: center;
 }
+
+@media(max-height: 251px) {
+  section {
+    width: 272px;
+    height: 84vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+button {
+  background-color: black;
+  cursor: pointer;
+  border: none;
+  padding: 10px 10px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px 40px 20px 40px;
+  position: relative;
+  border-radius: 12px;
+}
+.display {
+  margin-top: 22px;
+  background-color: rgba(129, 129, 129,0.5);
+  width: 240px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0 0 0;
+  border-radius: 10px;
+}
+#titulo{
+  font-size: 18px;
+}
+#init{
+display: none;
+}
+
     </style>
     <script src="/javascript/js.js" ></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/v1.5.3/dist/clipboard.min.js"></script>  
